@@ -55,7 +55,7 @@ class RedNeuro:
         capa_salida.deltas = derivada_sigmoide(capa_salida.sum_entradas) * error_salida
 
         ## Propagar error hacia capas ocultas
-        ## iterar cantidad de capas menos capa entrada y capa salida 
+        ## iterar cantidad de capas menos entrada y capa salida 
         ## empieza capa anterior a la de salida hasta la primera capa oculta
         for i in range(len(self.capas) - 2, -1, -1):
             ##Obtener capa actual y la siguiente (capa que esta antes)
@@ -70,7 +70,7 @@ class RedNeuro:
     def actualizar_pesos(self):
 
         for capa in self.capas:
-            ##Para cada capa se actualiza sus pesos
+            ##Para cada capa se actualiza sus pesos y sesgo
             act_pesos = np.matmul(np.atleast_2d(capa.entradas).T, np.atleast_2d(capa.deltas))
             capa.pesos += self.tasa_aprendizaje * act_pesos
             capa.bias += self.tasa_aprendizaje * capa.deltas.flatten()
@@ -78,8 +78,8 @@ class RedNeuro:
     def calcular_precision(self,entradas, salidas_esperadas):
         predicciones = self.predecir(entradas)
         predicciones_binarias = (predicciones >= 0.5).astype(int)  # Convertir a 0 o 1
-        salidas_binarias = salidas_esperadas.astype(int)
-        correctas = np.sum(predicciones_binarias == salidas_binarias)
+        salidas = salidas_esperadas.astype(int)
+        correctas = np.sum(predicciones_binarias == salidas)
         total = len(salidas_esperadas)
         return correctas / total
 

@@ -1,4 +1,3 @@
-from operator import le
 import sys
 import numpy as np
 
@@ -45,7 +44,7 @@ def ejecutar_vector(red):
     if len(valores) < 2:
         print("Debe ingresar al menos dos valores.")
         return
-    print(red.capas[0].num_entradas)
+    
     num_entradas = red.capas[0].num_entradas
 
     if len(valores) != num_entradas:
