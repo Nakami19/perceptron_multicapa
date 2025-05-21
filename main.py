@@ -18,7 +18,8 @@ def menu_red():
     print("2. Ejecutar red (archivo de prueba .txt)")
     print("3. Seguir entrenando")
     print("4. Guardar red en archivo")
-    print("5. Salir")
+    print("5. Mostrar gráfico de precisiones")
+    print("6. Salir")
     return input("Seleccione opción (1/2/3/4/5): ").strip()
 
 
@@ -147,7 +148,7 @@ def continuar_entrenando(red):
     archivo_sal_ent = input("Archivo de salidas de entrenamiento esperadas (.txt): ")
     archivo_pru = input("Archivo de prueba (.txt): ")
     archivo_sal_pru = input("Archivo de salidas esperadas (prueba .txt): ")
-    epsilon = int(input("Error aceptable: "))
+    epsilon = float(input("Error aceptable: "))
     try:
         ##obtengo los datos
         X_ent = cargar_datos(archivo_ent)
@@ -158,10 +159,14 @@ def continuar_entrenando(red):
         return
     ##entreno la red
     epocas = int(input("Número de épocas adicionales: "))
-    red.entrenar(entradas_entrenamiento= X_ent, salidas_esperadas=Y_ent, epocas=epocas, epsilon=epsilon, entradas_prueba=X_pru, salidas_prueba=Y_pru)
+    errores,precisiones_prueba,precisiones_entrenamiento = red.entrenar(entradas_entrenamiento= X_ent, salidas_esperadas=Y_ent, epocas=epocas, epsilon=epsilon, entradas_prueba=X_pru, salidas_prueba=Y_pru)
+    return errores, precisiones_prueba,precisiones_entrenamiento
 
 def main():
 
+    ##variables donde guardare precisiones para grafica
+    precisiones_entrenamiento = None
+    precisiones_prueba = None
 
     while True:
         opcion = menu_principal()
@@ -188,13 +193,16 @@ def main():
 
             ##Creo red con datos del usuario e inicio entrenamiento
             red = RedNeuro(num_entradas, num_capas, num_neuronas, num_salidas, tasa_aprendizaje= 0.5)
-            red.entrenar(entradas_entrenamiento= X_ent, salidas_esperadas=Y_ent, epocas=epocas, epsilon=0.02, entradas_prueba=X_pru, salidas_prueba=Y_pru)
+            errores,precisiones_prueba,precisiones_entrenamiento = red.entrenar(entradas_entrenamiento= X_ent, salidas_esperadas=Y_ent, epocas=epocas, epsilon=0.02, entradas_prueba=X_pru, salidas_prueba=Y_pru)
             print('Red entrenada con éxito')
             break
 
         elif opcion=='2': 
             archivo_cargar = input("Archivo con red guardada (.txt): ")
             red = cargar_red(archivo_cargar, tasa_aprendizaje=0.5)
+            if red is None:
+                print("No se pudo cargar la red. Verifique el archivo e intente nuevamente.")
+                continue
             print('Red cargada con éxito')
             break
         elif opcion=='3':
@@ -221,13 +229,19 @@ def main():
             
         elif opcion2 == '3':
             ## Seguir entrenando
-            continuar_entrenando(red)
+            errores,precisiones_prueba,precisiones_entrenamiento = continuar_entrenando(red)
         elif opcion2 == '4':
             ## Guardar red
             archivo_guardar = input("Nombre de archivo para guardar la red (.txt): ")
             guardar_red(red, archivo_guardar)
-            
+        
         elif opcion2 == '5':
+            if (precisiones_entrenamiento == None or precisiones_prueba==None):
+                print('Se debe realizar el entrenamiento primero')
+                continue
+            red.graficar(precisiones_entrenamiento=precisiones_entrenamiento, precisiones_prueba=precisiones_prueba)
+            
+        elif opcion2 == '6':
             print("Saliendo...")
             break
         else:

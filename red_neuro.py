@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 from activacion import derivada_sigmoide, sigmoidal
 from capa import Capa
 import numpy as np
@@ -72,10 +73,10 @@ class RedNeuro:
             ##Para cada capa se actualiza sus pesos
             act_pesos = np.matmul(np.atleast_2d(capa.entradas).T, np.atleast_2d(capa.deltas))
             capa.pesos += self.tasa_aprendizaje * act_pesos
-            capa.bias -= self.tasa_aprendizaje * capa.deltas.flatten()
+            capa.bias += self.tasa_aprendizaje * capa.deltas.flatten()
 
-    def calcular_precision(self, red, entradas, salidas_esperadas):
-        predicciones = red.predecir(entradas)
+    def calcular_precision(self,entradas, salidas_esperadas):
+        predicciones = self.predecir(entradas)
         predicciones_binarias = (predicciones >= 0.5).astype(int)  # Convertir a 0 o 1
         salidas_binarias = salidas_esperadas.astype(int)
         correctas = np.sum(predicciones_binarias == salidas_binarias)
@@ -88,6 +89,8 @@ class RedNeuro:
 
         errores =[]
         num_muestras = entradas_entrenamiento.shape[0]
+        precisiones_entrenamiento = [] 
+        precisiones_prueba = []
 
         for epoca in range(epocas):
             error_epoca = 0
@@ -114,8 +117,10 @@ class RedNeuro:
             # print(f"Epoca {epoca}, Error = {error_epoca:.5f}")
 
             # Calcular precisión de entrenamiento
-            precision_entrenamiento = self.calcular_precision(self, entradas_entrenamiento, salidas_esperadas)
-            precision_prueba = self.calcular_precision(self, entradas_prueba, salidas_prueba)
+            precision_entrenamiento = self.calcular_precision(entradas_entrenamiento, salidas_esperadas)
+            precisiones_entrenamiento.append(precision_entrenamiento * 100)
+            precision_prueba = self.calcular_precision(entradas_prueba, salidas_prueba)
+            precisiones_prueba.append(precision_prueba * 100)
 
             print(f"Época {epoca} | Error: {error_epoca:.5f} | "
                   f"Precisión entrenamiento: {precision_entrenamiento:.2%} | "
@@ -124,7 +129,7 @@ class RedNeuro:
             if (error_epoca < epsilon):
                 print(f'Convergencia alcanzada en la epoca {epoca}')
                 break
-        return errores 
+        return errores, precisiones_prueba,precisiones_entrenamiento
     
     def predecir(self, entradas):
 
@@ -132,6 +137,19 @@ class RedNeuro:
             return self.propagacion_adelante(entradas)
         else:
             return np.array([self.propagacion_adelante(entrada) for entrada in entradas])
+    
+    def graficar(self, precisiones_entrenamiento, precisiones_prueba):
+        plt.figure(figsize=(10, 6))
+        epocas = range(1, len(precisiones_entrenamiento) + 1)
+        plt.plot(epocas, precisiones_entrenamiento, 'b-', label='Precisión entrenamiento')
+        plt.plot(epocas, precisiones_prueba, 'r-', label='Precisión prueba')
+    
+        plt.title('Precisión por época')
+        plt.xlabel('Épocas')
+        plt.ylabel('Precisión')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 
 
