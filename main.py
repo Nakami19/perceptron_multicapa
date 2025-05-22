@@ -163,7 +163,8 @@ def continuar_entrenando(red):
         Y_ent = cargar_datos(archivo_sal_ent)
         X_pru = cargar_datos(archivo_pru)
         Y_pru = cargar_datos(archivo_sal_pru)
-    except SystemExit:
+    except:
+        print("Error al cargar los datos. Verifique los archivos e intente nuevamente.")
         return
     ##entreno la red
     epocas = int(input("Número de épocas adicionales: "))

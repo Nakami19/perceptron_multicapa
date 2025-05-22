@@ -86,57 +86,64 @@ class RedNeuro:
 
     def entrenar(self, entradas_entrenamiento, salidas_esperadas,epocas, epsilon, entradas_prueba, salidas_prueba):
         ## epsilon es margen de error para condicion de parada
+        try:
+            errores =[]
+            num_muestras = entradas_entrenamiento.shape[0]
+            precisiones_entrenamiento = [] 
+            precisiones_prueba = []
 
-        errores =[]
-        num_muestras = entradas_entrenamiento.shape[0]
-        precisiones_entrenamiento = [] 
-        precisiones_prueba = []
+            for epoca in range(epocas):
+                error_epoca = 0
+                indice_entradas = np.arange(num_muestras)
 
-        for epoca in range(epocas):
-            error_epoca = 0
-            indice_entradas = np.arange(num_muestras)
+                for i in indice_entradas:
+                    muestra_entrada = entradas_entrenamiento[i]
+                    muestras_salida = salidas_esperadas[i]
 
-            for i in indice_entradas:
-                muestra_entrada = entradas_entrenamiento[i]
-                muestras_salida = salidas_esperadas[i]
+                    salida = self.propagacion_adelante(muestra_entrada)
 
-                salida = self.propagacion_adelante(muestra_entrada)
+                    ##Calcular error cuadratico medio
+                    error_muestra = np.mean((muestras_salida - salida) ** 2)
+                    error_epoca += error_muestra
 
-                ##Calcular error cuadratico medio
-                error_muestra = np.mean((muestras_salida - salida) ** 2)
-                error_epoca += error_muestra
-
-                ## Retropropagacion y actualizacion de pesos
-                self.backPropagation(muestras_salida)
-                self.actualizar_pesos()
+                    ## Retropropagacion y actualizacion de pesos
+                    self.backPropagation(muestras_salida)
+                    self.actualizar_pesos()
             
-            ##Calcular error promedio de epoca
-            error_epoca /= len(indice_entradas)
-            errores.append(error_epoca)
+                ##Calcular error promedio de epoca
+                error_epoca /= len(indice_entradas)
+                errores.append(error_epoca)
 
-            # print(f"Epoca {epoca}, Error = {error_epoca:.5f}")
+                # print(f"Epoca {epoca}, Error = {error_epoca:.5f}")
 
-            # Calcular precisión de entrenamiento
-            precision_entrenamiento = self.calcular_precision(entradas_entrenamiento, salidas_esperadas)
-            precisiones_entrenamiento.append(precision_entrenamiento * 100)
-            precision_prueba = self.calcular_precision(entradas_prueba, salidas_prueba)
-            precisiones_prueba.append(precision_prueba * 100)
+                # Calcular precisión de entrenamiento
+                precision_entrenamiento = self.calcular_precision(entradas_entrenamiento, salidas_esperadas)
+                precisiones_entrenamiento.append(precision_entrenamiento * 100)
+                precision_prueba = self.calcular_precision(entradas_prueba, salidas_prueba)
+                precisiones_prueba.append(precision_prueba * 100)
 
-            print(f"Época {epoca} | Error: {error_epoca:.5f} | "
-                  f"Precisión entrenamiento: {precision_entrenamiento:.2%} | "
-                  f"Precisión prueba: {precision_prueba:.2%}")
+                print(f"Época {epoca} | Error: {error_epoca:.5f} | "
+                      f"Precisión entrenamiento: {precision_entrenamiento:.2%} | "
+                      f"Precisión prueba: {precision_prueba:.2%}")
 
-            if (error_epoca < epsilon):
-                print(f'Convergencia alcanzada en la epoca {epoca}')
-                break
-        return errores, precisiones_prueba,precisiones_entrenamiento
+                if (error_epoca < epsilon):
+                    print(f'Convergencia alcanzada en la epoca {epoca}')
+                    break
+            return errores, precisiones_prueba,precisiones_entrenamiento
+        except:
+            print("Error en el entrenamiento, revise los datos de entrada")
+            return None, None, None
     
     def predecir(self, entradas):
+        try:
 
-        if entradas.ndim == 1: 
-            return self.propagacion_adelante(entradas)
-        else:
-            return np.array([self.propagacion_adelante(entrada) for entrada in entradas])
+            if entradas.ndim == 1: 
+                return self.propagacion_adelante(entradas)
+            else:
+                return np.array([self.propagacion_adelante(entrada) for entrada in entradas])
+        except:
+            print("Error en la prediccion, revise los datos de entrada")
+            return None
     
     def graficar(self, precisiones_entrenamiento, precisiones_prueba):
         plt.figure(figsize=(10, 6))
