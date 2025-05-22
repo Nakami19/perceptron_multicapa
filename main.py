@@ -1,6 +1,7 @@
 import sys
 import numpy as np
-
+import tkinter as tk
+from tkinter import filedialog
 from capa import Capa
 from red_neuro import RedNeuro
 
@@ -32,6 +33,14 @@ def cargar_datos(nombre_archivo):
     except Exception as e:
         print(f"Error al cargar {nombre_archivo}: {e}")
         sys.exit(1)
+
+def seleccionar_archivo(mensaje="Seleccione un archivo"):
+    root = tk.Tk()
+    root.withdraw() 
+    root.attributes('-topmost', True) 
+    archivo = filedialog.askopenfilename(title=mensaje, filetypes=[("Text files", "*.txt")])
+    root.destroy()
+    return archivo
 
 def ejecutar_vector(red):
     entrada_str = input("Ingrese valores separados por comas (ej: 1.0,0.5,3.2): ")
@@ -143,10 +152,10 @@ def guardar_red(red, archivo):
 
 def continuar_entrenando(red):
     ##Pido los datos de entrenamiento
-    archivo_ent = input("Archivo de entrenamiento (.txt): ")
-    archivo_sal_ent = input("Archivo de salidas de entrenamiento esperadas (.txt): ")
-    archivo_pru = input("Archivo de prueba (.txt): ")
-    archivo_sal_pru = input("Archivo de salidas esperadas (prueba .txt): ")
+    archivo_ent = seleccionar_archivo("Archivo de entrenamiento (.txt): ")
+    archivo_sal_ent = seleccionar_archivo("Archivo de salidas de entrenamiento esperadas (.txt): ")
+    archivo_pru = seleccionar_archivo("Archivo de prueba (.txt): ")
+    archivo_sal_pru = seleccionar_archivo("Archivo de salidas esperadas (prueba .txt): ")
     epsilon = float(input("Error aceptable: "))
     try:
         ##obtengo los datos
@@ -159,6 +168,7 @@ def continuar_entrenando(red):
     ##entreno la red
     epocas = int(input("Número de épocas adicionales: "))
     errores,precisiones_prueba,precisiones_entrenamiento = red.entrenar(entradas_entrenamiento= X_ent, salidas_esperadas=Y_ent, epocas=epocas, epsilon=epsilon, entradas_prueba=X_pru, salidas_prueba=Y_pru)
+    print('Red entrenada con éxito')
     return errores, precisiones_prueba,precisiones_entrenamiento
 
 def main():
@@ -179,10 +189,10 @@ def main():
             else:
                 num_neuronas = 0
 
-            archivo_ent = input("Archivo de entrenamiento (.txt): ")
-            archivo_sal_ent = input("Archivo de salidas de entrenamiento esperadas (.txt): ")
-            archivo_pru = input("Archivo de prueba (.txt): ")
-            archivo_sal_pru = input("Archivo de salidas esperadas (.txt): ")
+            archivo_ent = seleccionar_archivo("Seleccione el archivo de entrenamiento (.txt)")
+            archivo_sal_ent = seleccionar_archivo("Seleccione archivo de salidas de entrenamiento esperadas (.txt)")
+            archivo_pru = seleccionar_archivo("Seleccione archivo de prueba (.txt)")
+            archivo_sal_pru = seleccionar_archivo("Seleccione archivo de salidas esperadas de prueba (.txt)")
             epocas = int(input("Número de épocas: "))
 
             X_ent = cargar_datos(archivo_ent)
@@ -197,7 +207,7 @@ def main():
             break
 
         elif opcion=='2': 
-            archivo_cargar = input("Archivo con red guardada (.txt): ")
+            archivo_cargar = seleccionar_archivo("Archivo con red guardada (.txt): ")
             red = cargar_red(archivo_cargar, tasa_aprendizaje=0.5)
             if red is None:
                 print("No se pudo cargar la red. Verifique el archivo e intente nuevamente.")
@@ -219,7 +229,7 @@ def main():
             ejecutar_vector(red)
         elif opcion2 == '2':
             ## Ejecutar datos de un archivo
-            archivo = input("Nombre de archivo de prueba (.txt, valores separados por comas): ")
+            archivo = seleccionar_archivo("Nombre de archivo de prueba (.txt, valores separados por comas): ")
             entradas = cargar_datos(archivo)
             for i in range(len(entradas)):
                 prediccion = red.predecir(entradas[i])
@@ -231,7 +241,7 @@ def main():
             errores,precisiones_prueba,precisiones_entrenamiento = continuar_entrenando(red)
         elif opcion2 == '4':
             ## Guardar red
-            archivo_guardar = input("Nombre de archivo para guardar la red (.txt): ")
+            archivo_guardar = seleccionar_archivo("Archivo para guardar la red (.txt): ")
             guardar_red(red, archivo_guardar)
         
         elif opcion2 == '5':
